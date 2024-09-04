@@ -8,22 +8,8 @@ function App() {
   const [correctWord, setCorrectWord] = useState("REACT");
   const [colNumber, setColNumber] = useState(0);
   const [rowNumber, setRowNumber] = useState(0);
-  const [grid, setGrid] = useState<string[][]>([
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-  ]);
-  const [colorGrid, setColorGrid] = useState<string[][]>([
-    ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-    ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-    ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-    ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-    ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-    ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-  ]);
+  const [grid, setGrid] = useState<string[][]>(Array(6).fill(Array(5).fill('')));
+  const [colorGrid, setColorGrid] = useState<string[][]>(Array(6).fill(Array(5).fill('bg-gray-500')));
 
   const fetchRandomWord = useCallback(async () => {
     const response = await fetch('https://random-word-api.herokuapp.com/word?length=5');
@@ -35,22 +21,8 @@ function App() {
   const resetGame = useCallback(() => {
     setColNumber(0);
     setRowNumber(0);
-    setGrid([
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-    ]);
-    setColorGrid([
-      ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-      ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-      ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-      ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-      ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-      ['bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500', 'bg-gray-500'],
-    ]);
+    setGrid(Array(6).fill(Array(5).fill('')));
+    setColorGrid(Array(6).fill(Array(5).fill('bg-gray-500')));
     setGameKey(prevKey => prevKey + 1);
   }, []);
 
