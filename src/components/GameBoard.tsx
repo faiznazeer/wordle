@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import InputField from './InputField';
 
-export default function GameBoard({ correctWord, isGameOver, setIsGameOver }: { correctWord: string, isGameOver: boolean, setIsGameOver: any}) {
+export default function GameBoard({ correctWord, isGameOver, setIsGameOver, updateKeyStatus }: { correctWord: string, isGameOver: boolean, setIsGameOver: any, updateKeyStatus: any}) {
     const [colNumber, setColNumber] = useState(0);
     const [rowNumber, setRowNumber] = useState(0);
     const [grid, setGrid] = useState<string[][]>(Array(6).fill(null).map(() => Array(5).fill('')));
