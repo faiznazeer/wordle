@@ -1,13 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import InputField from './InputField';
 
-export default function GameBoard({ correctWord, isGameOver, setIsGameOver, updateKeyStatus }: { correctWord: string, isGameOver: boolean, setIsGameOver: any, updateKeyStatus: any}) {
+export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setKeyStatus }: { correctWord: string, isGameOver: boolean, setIsGameOver: any, setKeyStatus: any}) {
     const [colNumber, setColNumber] = useState(0);
     const [rowNumber, setRowNumber] = useState(0);
     const [grid, setGrid] = useState<string[][]>(Array(6).fill(null).map(() => Array(5).fill('')));
     const [colorGrid, setColorGrid] = useState<string[][]>(Array(6).fill(null).map(() => Array(5).fill('bg-gray-500')));
 
     const checkAndColorRow = (rowToCheck: string[], correctWord: string) => {
+         
         const coloredRow = rowToCheck.map((letter, index) => {
         if (letter === correctWord[index]) {
             return 'bg-green-500';
@@ -21,6 +22,19 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, upda
         const newColorGrid = [...colorGrid];
         newColorGrid[rowNumber] = coloredRow;
         setColorGrid(newColorGrid);
+        setKeyStatus((keyStatus: any) => {
+          const newKeyStatus = { ...keyStatus };
+          rowToCheck.forEach((letter, index) => {
+            if (letter === correctWord[index]) {
+              newKeyStatus[letter] = 'correct';
+            } else if (correctWord.includes(letter) && newKeyStatus[letter] !== 'correct') {
+              newKeyStatus[letter] = 'present';
+            } else if (newKeyStatus[letter] !== 'correct' && newKeyStatus[letter] !== 'present') {
+              newKeyStatus[letter] = 'absent';
+            }
+          });
+          return newKeyStatus;
+        })
     };
     
     const handleKeyDown = useCallback((event: KeyboardEvent) => {

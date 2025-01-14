@@ -34,9 +34,9 @@ function App() {
           correctWord={correctWord}
           isGameOver={isGameOver}
           setIsGameOver={setIsGameOver}
-          updateKeyStatus={setKeyStatus}
+          setKeyStatus={setKeyStatus}
         />
-        <KeyBoard onKeyPress={handleKeyPress} keyStatus={keyStatus} />
+        <KeyBoard keyStatus={keyStatus} />
         <button
           onClick={startNewGame}
           className='mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'
