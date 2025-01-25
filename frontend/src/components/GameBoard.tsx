@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import InputField from './InputField';
 
-export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setKeyStatus }: { correctWord: string, isGameOver: boolean, setIsGameOver: any, setKeyStatus: any}) {
+export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setKeyStatus, allowedWordList }: { correctWord: string, isGameOver: boolean, setIsGameOver: any, setKeyStatus: any, allowedWordList: Set<string> }) {
     const [colNumber, setColNumber] = useState(0);
     const [rowNumber, setRowNumber] = useState(0);
     const [grid, setGrid] = useState<string[][]>(Array(6).fill(null).map(() => Array(5).fill('')));
@@ -53,7 +53,9 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
             }
         } else if (key === 'ENTER') {
             // Handle enter key (submit word)
-            if (colNumber === 5) {
+            const currentWord = grid[rowNumber].join('').toLowerCase();
+            const isWordValid = allowedWordList.has(currentWord);
+            if (colNumber === 5 && isWordValid) {
                 const newRowNumber = rowNumber + 1;
                 setRowNumber(newRowNumber);
                 setColNumber(0);        

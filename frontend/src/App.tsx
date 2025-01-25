@@ -8,6 +8,7 @@ function App() {
   const [isGameOver, setIsGameOver] = useState(false);
   const [gameKey, setGameKey] = useState(0);
   const [keyStatus, setKeyStatus] = useState<Record<string, 'unused' | 'correct' | 'present' | 'absent'>>({});
+  const [allowedWordList, setAllowedWordList] = useState<Set<string>>(new Set());
 
   const startNewGame = useCallback(() => {
     setGameKey(k => k + 1);
@@ -25,8 +26,17 @@ function App() {
     };
     fetchRandomWord();
   }, [gameKey])
-  
 
+  useEffect(() => {
+    const fetchWordList = async () => {
+      const response = await fetch("https://gist.githubusercontent.com/faiznazeer/358609c97790915efa0a2d90e6192cf0/raw/633058e11743065ad2822e1d2e6505682a01a9e6/wordle-nyt-words-14855.txt");
+      const data = await response.text();
+      setAllowedWordList(new Set(data.split("\n")));
+      console.log("Word list fetched");
+    };
+    fetchWordList();
+  }, []);
+  
   return (
     <div className='bg-slate-950 h-screen'>
       <div className='flex flex-col items-center text-white'>
@@ -35,6 +45,7 @@ function App() {
           isGameOver={isGameOver}
           setIsGameOver={setIsGameOver}
           setKeyStatus={setKeyStatus}
+          allowedWordList={allowedWordList}
         />
         <KeyBoard keyStatus={keyStatus} />
         <button
