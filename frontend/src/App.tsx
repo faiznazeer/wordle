@@ -17,10 +17,10 @@ function App() {
   useEffect(() => {
     const fetchRandomWord = async () => {
       console.log("Fetching new word, gameKey:", gameKey);
-      const response = await fetch('https://random-word-api.herokuapp.com/word?length=5');
+      const response = await fetch("http://localhost:5000/get_word");
       const data = await response.json();
       console.log(data);
-      setCorrectWord(data[0].toUpperCase());
+      setCorrectWord(data["word"].toUpperCase());
       setIsGameOver(false);
     };
     fetchRandomWord();
