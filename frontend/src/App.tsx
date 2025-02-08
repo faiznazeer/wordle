@@ -18,7 +18,7 @@ function App() {
   useEffect(() => {
     const fetchRandomWord = async () => {
       console.log("Fetching new word, gameKey:", gameKey);
-      const response = await fetch("http://localhost:5000/get_word");
+      const response = await fetch("https://8ztmszmnuc.execute-api.ap-south-1.amazonaws.com/prod/get_word");
       const data = await response.json();
       console.log(data);
       setCorrectWord(data["word"].toUpperCase());
