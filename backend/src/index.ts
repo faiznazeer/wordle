@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 import cors from "cors";
+import serverless from "serverless-http";
 
 const app = express();
 app.use(cors());
@@ -14,6 +15,4 @@ app.get("/get_word", async (req, res) => {
     });
 })
 
-app.listen(5000, () => {
-    console.log("Server is running on port 5000");
-})
+module.exports.handler = serverless(app);
