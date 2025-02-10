@@ -17,7 +17,7 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
         } else if (correctWord.includes(letter)) {
             return 'bg-yellow-500';
         } else {
-            return 'bg-gray-500';
+            return 'bg-zinc-700';
         }
         });
         // Update the grid with colored information
@@ -116,7 +116,7 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
         setColNumber(0);
         setRowNumber(0);
         setGrid(Array(6).fill(null).map(() => Array(5).fill('')));
-        setColorGrid(Array(6).fill(null).map(() => Array(5).fill('bg-gray-500')));
+        setColorGrid(Array(6).fill(null).map(() => Array(5).fill('bg-neutral-500')));
     }, [correctWord]);
 
     return (
@@ -141,7 +141,7 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
                 key={`empty-${index}-${colIndex}`}
                 value=""
                 isActive={false}
-                bgColor={'bg-gray-500'}
+                bgColor={'bg-neutral-500'}
               />
             ))}
           </div>

@@ -10,8 +10,8 @@ const Key: React.FC<KeyProps> = ({ letter, status }) => {
     switch (status) {
       case 'correct': return 'bg-green-500';
       case 'present': return 'bg-yellow-500';
-      case 'absent': return 'bg-gray-500';
-      default: return 'bg-gray-400';
+      case 'absent': return 'bg-zinc-700';
+      default: return 'bg-neutral-500';
     }
   };
 
