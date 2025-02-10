@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import './App.css'
 import GameBoard from './components/GameBoard';
 import KeyBoard from './components/KeyBoard';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [correctWord, setCorrectWord] = useState("REACT");
@@ -54,6 +56,7 @@ function App() {
         >
           Play Again
         </button>
+        <ToastContainer />
       </div>
     </div>
   )

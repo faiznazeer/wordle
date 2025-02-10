@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import InputField from './InputField';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setKeyStatus, allowedWordList }: { correctWord: string, isGameOver: boolean, setIsGameOver: any, setKeyStatus: any, allowedWordList: Set<string> }) {
     const [colNumber, setColNumber] = useState(0);
@@ -54,7 +56,33 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
         } else if (key === 'ENTER') {
             // Handle enter key (submit word)
             const currentWord = grid[rowNumber].join('').toLowerCase();
+            if (colNumber < 5) {
+                toast.error("Not enough letters", {
+                    position: "top-center",
+                    autoClose: 1000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    style: { backgroundColor: 'white', color: 'black' }
+                });
+                return;
+            }
             const isWordValid = allowedWordList.has(currentWord);
+            if (!isWordValid) {
+                toast.error("Not in word list", {
+                    position: "top-center",
+                    autoClose: 1000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    style: { backgroundColor: 'white', color: 'black' }
+                });
+                return;
+            }
             if (colNumber === 5 && isWordValid) {
                 const newRowNumber = rowNumber + 1;
                 setRowNumber(newRowNumber);
@@ -74,7 +102,7 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
             setGrid(newGrid);
             setColNumber(colNumber + 1);
         }
-    }, [colNumber, rowNumber, grid, correctWord, isGameOver, setIsGameOver]);
+    }, [colNumber, rowNumber, grid, correctWord, isGameOver, setIsGameOver, allowedWordList]);
 
     useEffect(() => {
         const keyDownHandler = (event: KeyboardEvent) => handleKeyDown(event);
