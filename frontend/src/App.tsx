@@ -71,18 +71,30 @@ function App() {
 
   useEffect(() => {
     const fetchRandomWord = async () => {
-      if (!token) return;
-      
-      console.log("Fetching new word, gameKey:", gameKey);
-      const response = await fetch(`${API_URL}/get_word`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      try {
+        let word;
+        if (token) {
+          // Authenticated flow - fetch from API with game tracking
+          const response = await fetch(`${API_URL}/get_word`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const data = await response.json();
+          word = data.word;
+        } else {
+          // Non-authenticated flow - fetch only word list
+          const response = await fetch("https://gist.githubusercontent.com/faiznazeer/74d88006748a622aa696bdee811f38fd/raw/60531ab531c4db602dacaa4f6c0ebf2590b123da/wordle-nyt-answers-alphabetical.txt");
+          const wordList = (await response.text()).split("\n");
+          word = wordList[Math.floor(Math.random() * wordList.length)];
         }
-      });
-      const data = await response.json();
-      setCorrectWord(data.word.toUpperCase());
-      setIsGameOver(false);
+        setCorrectWord(word.toUpperCase());
+        setIsGameOver(false);
+      } catch (error) {
+        console.error("Error fetching word:", error);
+      }
     };
+    
     fetchRandomWord();
   }, [gameKey, token]);
 
@@ -96,34 +108,25 @@ function App() {
     fetchWordList();
   }, []);
   
-  if (!token) {
-    return (
-      <div className='bg-slate-950 h-screen flex items-center justify-center'>
-        <div className='text-white text-center'>
-          <h1 className='text-2xl mb-4'>Welcome to Unlimited Wordle</h1>
-          <GoogleOAuthProvider clientId={import.meta.env.VITE_API_GOOGLE_CLIENT_ID}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => console.log('Login Failed')}
-            />
-          </GoogleOAuthProvider>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className='bg-slate-950 h-screen'>
       <nav className='bg-slate-900 p-4'>
         <div className='container mx-auto flex justify-between items-center'>
           <h1 className='text-white text-xl font-bold'>Unlimited Wordle</h1>
-          {user && (
+          {!token ? (
+            <GoogleOAuthProvider clientId={import.meta.env.VITE_API_GOOGLE_CLIENT_ID}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => console.log('Login Failed')}
+              />
+            </GoogleOAuthProvider>
+          ) : (
             <div className='relative'>
               <button 
                 className='flex items-center gap-2 text-white hover:bg-slate-800 px-3 py-2 rounded-md'
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
-                <span>Hi {user.name}</span>
+                <span>Hi {user?.name}</span>
                 <svg 
                   className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
@@ -170,12 +173,12 @@ function App() {
           allowedWordList={allowedWordList}
         />
         <KeyBoard keyStatus={keyStatus} />
-        <button
+        {isGameOver && <button
           onClick={startNewGame}
           className='mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'
         >
           Play Again
-        </button>
+        </button>}
         <ToastContainer />
       </div>
     </div>
