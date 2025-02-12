@@ -64,6 +64,7 @@ function App() {
       const data = await response.json();
       localStorage.setItem('token', data.token);
       setToken(data.token);
+      startNewGame();
     } catch (error) {
       console.error('Login failed:', error);
     }
@@ -154,6 +155,7 @@ function App() {
                       setToken(null);
                       setUser(null);
                       setIsDropdownOpen(false);
+                      startNewGame();
                     }}
                   >
                     Logout
