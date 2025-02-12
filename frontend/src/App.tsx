@@ -4,6 +4,12 @@ import GameBoard from './components/GameBoard';
 import KeyBoard from './components/KeyBoard';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { CredentialResponse, GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+
+interface User {
+  name: string;
+  email: string;
+}
 
 function App() {
   const [correctWord, setCorrectWord] = useState("REACT");
@@ -11,6 +17,11 @@ function App() {
   const [gameKey, setGameKey] = useState(0);
   const [keyStatus, setKeyStatus] = useState<Record<string, 'unused' | 'correct' | 'present' | 'absent'>>({});
   const [allowedWordList, setAllowedWordList] = useState<Set<string>>(new Set());
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const startNewGame = useCallback(() => {
     setGameKey(k => k + 1);
@@ -18,16 +29,62 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const fetchRandomWord = async () => {
-      console.log("Fetching new word, gameKey:", gameKey);
-      const response = await fetch("https://8ztmszmnuc.execute-api.ap-south-1.amazonaws.com/prod/get_word");
+    if (token) {
+      // Verify token and set user
+      fetchUserProfile();
+    }
+  }, [token]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch(`${API_URL}/auth/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const userData = await response.json();
+      setUser(userData);
+    } catch (error) {
+      localStorage.removeItem('token');
+      setToken(null);
+      setUser(null);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: credentialResponse.credential })
+      });
+      
       const data = await response.json();
-      console.log(data);
-      setCorrectWord(data["word"].toUpperCase());
+      localStorage.setItem('token', data.token);
+      setToken(data.token);
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchRandomWord = async () => {
+      if (!token) return;
+      
+      console.log("Fetching new word, gameKey:", gameKey);
+      const response = await fetch(`${API_URL}/get_word`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      setCorrectWord(data.word.toUpperCase());
       setIsGameOver(false);
     };
     fetchRandomWord();
-  }, [gameKey])
+  }, [gameKey, token]);
 
   useEffect(() => {
     const fetchWordList = async () => {
@@ -39,8 +96,71 @@ function App() {
     fetchWordList();
   }, []);
   
+  if (!token) {
+    return (
+      <div className='bg-slate-950 h-screen flex items-center justify-center'>
+        <div className='text-white text-center'>
+          <h1 className='text-2xl mb-4'>Welcome to Unlimited Wordle</h1>
+          <GoogleOAuthProvider clientId={import.meta.env.VITE_API_GOOGLE_CLIENT_ID}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => console.log('Login Failed')}
+            />
+          </GoogleOAuthProvider>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='bg-slate-950 h-screen'>
+      <nav className='bg-slate-900 p-4'>
+        <div className='container mx-auto flex justify-between items-center'>
+          <h1 className='text-white text-xl font-bold'>Unlimited Wordle</h1>
+          {user && (
+            <div className='relative'>
+              <button 
+                className='flex items-center gap-2 text-white hover:bg-slate-800 px-3 py-2 rounded-md'
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                <span>Hi {user.name}</span>
+                <svg 
+                  className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isDropdownOpen && (
+                <div className='absolute right-0 mt-2 w-48 bg-slate-800 rounded-md shadow-lg py-1'>
+                  <button 
+                    className='block w-full text-left px-4 py-2 text-white hover:bg-slate-700'
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    Profile
+                  </button>
+                  <button 
+                    className='block w-full text-left px-4 py-2 text-white hover:bg-slate-700'
+                    onClick={() => {
+                      localStorage.removeItem('token');
+                      setToken(null);
+                      setUser(null);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </nav>
       <div className='flex flex-col items-center text-white'>
         <GameBoard
           correctWord={correctWord}
