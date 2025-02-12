@@ -3,7 +3,7 @@ import InputField from './InputField';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setKeyStatus, allowedWordList }: { correctWord: string, isGameOver: boolean, setIsGameOver: any, setKeyStatus: any, allowedWordList: Set<string> }) {
+export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setKeyStatus, allowedWordList, gameId }: { correctWord: string, isGameOver: boolean, setIsGameOver: any, setKeyStatus: any, allowedWordList: Set<string>, gameId?: number }) {
     const [colNumber, setColNumber] = useState(0);
     const [rowNumber, setRowNumber] = useState(0);
     const [grid, setGrid] = useState<string[][]>(Array(6).fill(null).map(() => Array(5).fill('')));
@@ -93,6 +93,20 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
                 const isGameCompleted = grid[rowNumber].join('') === correctWord;
                 if (isGameCompleted || newRowNumber === 6) {
                     setIsGameOver(true);
+                    
+                    if (gameId) {
+                        fetch(`/api/game/${gameId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            },
+                            body: JSON.stringify({
+                                won: isGameCompleted,
+                                attempts: newRowNumber
+                            })
+                        }).catch(console.error);
+                    }
                 }
             }
         } else if (/^[A-Z]$/.test(key) && colNumber < 5) {
@@ -102,7 +116,7 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
             setGrid(newGrid);
             setColNumber(colNumber + 1);
         }
-    }, [colNumber, rowNumber, grid, correctWord, isGameOver, setIsGameOver, allowedWordList]);
+    }, [colNumber, rowNumber, grid, correctWord, isGameOver, setIsGameOver, allowedWordList, gameId]);
 
     useEffect(() => {
         const keyDownHandler = (event: KeyboardEvent) => handleKeyDown(event);

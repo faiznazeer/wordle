@@ -100,18 +100,49 @@ app.get("/auth/profile", authenticateToken, async (req: Request, res: Response):
   }
 });
 
-// Protected route to get random word
+// Combined endpoint to get word and start game
 app.get("/get_word", authenticateToken, async (req: Request, res: Response) => {
   try {
     const response = await axios.get("https://gist.githubusercontent.com/faiznazeer/74d88006748a622aa696bdee811f38fd/raw/60531ab531c4db602dacaa4f6c0ebf2590b123da/wordle-nyt-answers-alphabetical.txt");
     const wordList = response.data.split("\n");
     const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
+    
+    // Create game record
+    const game = await prisma.game.create({
+      data: {
+        userId: (req as any).user.userId,
+        word: randomWord,
+        status: 'IN_PROGRESS'
+      }
+    });
+
     res.json({
-      word: randomWord
+      word: randomWord,
+      gameId: game.id
     });
   } catch (error) {
-    console.error('Word fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch word' });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update game status
+app.patch("/game/:id", authenticateToken, async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { won, attempts } = req.body;
+  
+  try {
+    await prisma.game.update({
+      where: { id: parseInt(id) },
+      data: {
+        status: won ? 'WON' : 'LOST',
+        attempts,
+        completedAt: new Date()
+      }
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update game' });
   }
 });
 

@@ -17,11 +17,12 @@ model User {
 }
 
 model Game {
-  id            String    @id @default(uuid())
-  userId        String
-  word          String
-  guesses       Int
-  won           Boolean
-  createdAt     DateTime  @default(now())
-  user          User      @relation(fields: [userId], references: [id])
-} 
+  id          Int      @id @default(autoincrement())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  word        String
+  status      String   // 'IN_PROGRESS', 'WON', 'LOST'
+  attempts    Int?
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+}
