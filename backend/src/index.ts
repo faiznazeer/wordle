@@ -103,6 +103,24 @@ app.get("/auth/profile", authenticateToken, async (req: Request, res: Response):
 // Combined endpoint to get word and start game
 app.get("/get_word", authenticateToken, async (req: Request, res: Response) => {
   try {
+    // First check for any in-progress game
+    const existingGame = await prisma.game.findFirst({
+      where: {
+        userId: (req as any).user.userId,
+        status: 'IN_PROGRESS'
+      }
+    });
+
+    // If there's an existing game, return it and stop execution
+    if (existingGame) {
+      res.json({
+        word: existingGame.word,
+        gameId: existingGame.id
+      });
+      return;
+    }
+
+    // If no existing game, create a new one
     const response = await axios.get("https://gist.githubusercontent.com/faiznazeer/74d88006748a622aa696bdee811f38fd/raw/60531ab531c4db602dacaa4f6c0ebf2590b123da/wordle-nyt-answers-alphabetical.txt");
     const wordList = response.data.split("\n");
     const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
