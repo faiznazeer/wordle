@@ -9,6 +9,8 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
     const [grid, setGrid] = useState<string[][]>(Array(6).fill(null).map(() => Array(5).fill('')));
     const [colorGrid, setColorGrid] = useState<string[][]>(Array(6).fill(null).map(() => Array(5).fill('bg-gray-500')));
 
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const checkAndColorRow = (rowToCheck: string[], correctWord: string) => {
          
         const coloredRow = rowToCheck.map((letter, index) => {
@@ -95,7 +97,7 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
                     setIsGameOver(true);
                     
                     if (gameId) {
-                        fetch(`/api/game/${gameId}`, {
+                        fetch(`${API_URL}/game/${gameId}`, {
                             method: 'PATCH',
                             headers: {
                                 'Content-Type': 'application/json',

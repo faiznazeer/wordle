@@ -15,6 +15,7 @@ function App() {
   const [correctWord, setCorrectWord] = useState("REACT");
   const [isGameOver, setIsGameOver] = useState(false);
   const [gameKey, setGameKey] = useState(0);
+  const [gameId, setGameId] = useState(0);
   const [keyStatus, setKeyStatus] = useState<Record<string, 'unused' | 'correct' | 'present' | 'absent'>>({});
   const [allowedWordList, setAllowedWordList] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<User | null>(null);
@@ -83,6 +84,7 @@ function App() {
           });
           const data = await response.json();
           word = data.word;
+          setGameId(data.gameId);
         } else {
           // Non-authenticated flow - fetch only word list
           const response = await fetch("https://gist.githubusercontent.com/faiznazeer/74d88006748a622aa696bdee811f38fd/raw/60531ab531c4db602dacaa4f6c0ebf2590b123da/wordle-nyt-answers-alphabetical.txt");
@@ -173,6 +175,7 @@ function App() {
           setIsGameOver={setIsGameOver}
           setKeyStatus={setKeyStatus}
           allowedWordList={allowedWordList}
+          gameId={gameId}
         />
         <KeyBoard keyStatus={keyStatus} />
         {isGameOver && <button
