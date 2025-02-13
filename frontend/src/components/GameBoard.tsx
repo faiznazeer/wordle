@@ -96,6 +96,31 @@ export default function GameBoard({ correctWord, isGameOver, setIsGameOver, setK
                 if (isGameCompleted || newRowNumber === 6) {
                     setIsGameOver(true);
                     
+                    // Add toast notifications for game completion
+                    if (isGameCompleted) {
+                        toast.success(`Congratulations! You won in ${newRowNumber} ${newRowNumber === 1 ? 'try' : 'tries'}!`, {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            style: { backgroundColor: 'white', color: 'black' }
+                        });
+                    } else {
+                        toast.error(`Game Over! The word was ${correctWord}`, {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            style: { backgroundColor: 'white', color: 'black' }
+                        });
+                    }
+                    
                     if (gameId) {
                         fetch(`${API_URL}/game/${gameId}`, {
                             method: 'PATCH',
