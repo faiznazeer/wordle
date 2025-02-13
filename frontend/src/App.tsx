@@ -11,6 +11,14 @@ interface User {
   email: string;
 }
 
+interface GameStats {
+  status: 'WON' | 'LOST';
+  attempts: number | null;
+  _count: {
+    _all: number;
+  }
+}
+
 function App() {
   const [correctWord, setCorrectWord] = useState("REACT");
   const [isGameOver, setIsGameOver] = useState(false);
@@ -21,6 +29,8 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [gameStats, setGameStats] = useState<GameStats[]>([]);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -110,6 +120,21 @@ function App() {
     };
     fetchWordList();
   }, []);
+
+  const fetchGameHistory = async () => {
+    try {
+      const response = await fetch(`${API_URL}/game/history`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      setGameStats(data);
+      setShowHistory(true);
+    } catch (error) {
+      console.error('Error fetching game history:', error);
+    }
+  };
   
   return (
     <div className='bg-slate-950 h-screen'>
@@ -145,10 +170,11 @@ function App() {
                   <button 
                     className='block w-full text-left px-4 py-2 text-white hover:bg-slate-700'
                     onClick={() => {
+                      fetchGameHistory();
                       setIsDropdownOpen(false);
                     }}
                   >
-                    Profile
+                    History
                   </button>
                   <button 
                     className='block w-full text-left px-4 py-2 text-white hover:bg-slate-700'
@@ -185,6 +211,48 @@ function App() {
           Play Again
         </button>}
         <ToastContainer />
+        {showHistory && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-slate-800 p-6 rounded-lg max-w-md w-full mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Game History</h2>
+                <button 
+                  onClick={() => setShowHistory(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-700 p-3 rounded">
+                    <p className="text-lg font-bold">
+                      Won: {gameStats.filter(stat => stat.status === 'WON').reduce((acc, stat) => acc + stat._count._all, 0)}
+                    </p>
+                  </div>
+                  <div className="bg-slate-700 p-3 rounded">
+                    <p className="text-lg font-bold">
+                      Lost: {gameStats.filter(stat => stat.status === 'LOST').reduce((acc, stat) => acc + stat._count._all, 0)}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold mb-2">Wins by attempts:</h3>
+                  {gameStats
+                    .filter(stat => stat.status === 'WON')
+                    .sort((a, b) => (a.attempts || 0) - (b.attempts || 0))
+                    .map(stat => (
+                      <div key={stat.attempts} className="flex justify-between bg-slate-700 p-2 rounded mb-2">
+                        <span>{stat.attempts} attempts:</span>
+                        <span>{stat._count._all} times</span>
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

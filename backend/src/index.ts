@@ -146,6 +146,29 @@ app.patch("/game/:id", authenticateToken, async (req: Request, res: Response) =>
   }
 });
 
+// Add this new endpoint before the module.exports
+app.get("/game/history", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const games = await prisma.game.groupBy({
+      by: ['status', 'attempts'],
+      where: {
+        userId: (req as any).user.userId,
+        status: {
+          not: 'IN_PROGRESS'
+        }
+      },
+      _count: {
+        _all: true
+      }
+    });
+    
+    res.json(games);
+  } catch (error) {
+    console.error('Error fetching game history:', error);
+    res.status(500).json({ error: 'Failed to fetch game history' });
+  }
+});
+
 if (process.env.NODE_ENV === 'dev') {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
