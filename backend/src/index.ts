@@ -39,11 +39,11 @@ app.post("/auth/google", async (req, res) => {
     }
 
     const { email, name, sub: googleId } = payload;
-    
+
     let user = await prisma.user.findUnique({ 
       where: { googleId }
     });
-    
+
     if (!user) {
       user = await prisma.user.create({
         data: {
@@ -72,6 +72,7 @@ app.post("/auth/google", async (req, res) => {
       }
     }); 
   } catch (error) {
+    console.log('Error in google login: ', error);
     res.status(401).json({ error: 'Invalid token' });
   }
 });
@@ -160,6 +161,7 @@ app.patch("/game/:id", authenticateToken, async (req: Request, res: Response) =>
     });
     res.json({ success: true });
   } catch (error) {
+    console.log('Error in updating game details: ', error);
     res.status(500).json({ error: 'Failed to update game' });
   }
 });
